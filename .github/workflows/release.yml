@@ -17,6 +17,8 @@ jobs:
             args: '--target aarch64-apple-darwin'
           - platform: macos-latest
             args: ''
+          - platform: windows-latest
+            args: ''
           - platform: ubuntu-latest
             args: ''
 
@@ -47,13 +49,33 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - uses: oven-sh/setup-bun@v1
+      - name: Sync node version and setup cache
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 'lts/*'
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install frontend dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: bun install --frozen-lockfile # Change this to npm, yarn or pnpm.
+        run: pnpm install --frozen-lockfile # Change this to npm, yarn or pnpm.
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
@@ -63,7 +85,7 @@ jobs:
         with:
           args: ${{ matrix.settings.args }}
           tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          tauriScript: bun tauri
+          tauriScript: pnpm tauri
           releaseName: 'CCTChaz v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: 'See the assets to download and install this version.'
           releaseDraft: true
