@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "chaz-cam2",
+    "productName": "CCTChaz",
     "version": "0.0.0"
   },
   "tauri": {
@@ -17,7 +17,9 @@
         "open": true
       },
       "fs": {
-        "scope": ["$RESOURCE/*"]
+        "scope": [
+          "$RESOURCE/*"
+        ]
       }
     },
     "bundle": {
@@ -43,7 +45,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "title": "Chaz Cam 1.0",
+        "title": "CCTChaz v1",
         "width": 1200,
         "center": true,
         "titleBarStyle": "Overlay"
